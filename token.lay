@@ -1,0 +1,12 @@
+export class Token {
+  init(kind: number, lexeme: string, literal: any, line: number) {
+    @kind = kind;
+    @lexeme = lexeme;
+    @literal = literal;
+    @line = line;
+  }
+
+  str() -> string {
+    "${@kind} ${@lexeme} ${@literal}"
+  }
+}

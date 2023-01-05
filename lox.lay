@@ -1,0 +1,51 @@
+import std.env:{args};
+import std.io.fs:{File};
+import std.io.stdio:{stdin, stdout};
+import self.scanner:{Scanner};
+
+let hadError = false;
+
+fn runFile(path: string) {
+  run(File.readAllText(path));
+
+  if hadError {
+    exit(65);
+  }
+}
+
+fn runPrompt() {
+  while true {
+    stdout.write("> ");
+    stdout.flush();
+    let line = stdin.readLine();
+    if line == nil {
+      break;
+    }
+
+    run(line);
+    hadError = false;
+  }
+}
+
+fn run(source: string) {
+  let scanner = Scanner(source);
+  let tokens = scanner.scanTokens();
+
+  for token in tokens {
+    stdout.writeln(token.str());
+  }
+}
+
+
+fn main() {
+  if args().len() > 3 {
+    print("Usage: llox [script]");
+  } else if args().len() == 3 {
+    runFile(args()[2]);
+  } else {
+    runPrompt();
+  }
+}
+
+main();
+

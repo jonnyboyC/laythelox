@@ -1,0 +1,9 @@
+import std.io.stdio:{stderr};
+
+export fn error(line: number, message: string) {
+  report(line, "", message);
+}
+
+fn report(line: number, where: string, message: string) {
+  stderr.writeln("[line ${line}] Error${where}: ${message}");
+}

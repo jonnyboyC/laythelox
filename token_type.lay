@@ -1,0 +1,47 @@
+// Single-character tokens.
+export let LEFT_PAREN = 0;
+export let RIGHT_PAREN = 1;
+export let LEFT_BRACE = 2;
+export let RIGHT_BRACE = 3;
+export let COMMA = 4;
+export let DOT = 5;
+export let MINUS = 6;
+export let PLUS = 7;
+export let SEMICOLON = 8;
+export let SLASH = 9;
+export let STAR = 10;
+
+// One or two character tokens.
+export let BANG = 11;
+export let BANG_EQUAL = 12;
+export let EQUAL = 13;
+export let EQUAL_EQUAL = 14;
+export let GREATER = 15;
+export let GREATER_EQUAL = 16;
+export let LESS = 17;
+export let LESS_EQUAL = 18;
+
+// Literals.
+export let IDENTIFIER = 19;
+export let STRING = 20;
+export let NUMBER = 21;
+
+// Keywords.
+export let AND = 22;
+export let CLASS = 23;
+export let ELSE = 24;
+export let FALSE = 25;
+export let FUN = 26;
+export let FOR = 27;
+export let IF = 28;
+export let NIL = 29;
+export let OR = 30;
+export let PRINT = 31;
+export let RETURN = 32;
+export let SUPER = 33;
+export let THIS = 34;
+export let TRUE = 35;
+export let VAR = 36;
+export let WHILE = 37;
+
+export let EOF = 38;
