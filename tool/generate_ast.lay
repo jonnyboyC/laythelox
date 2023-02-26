@@ -1,0 +1,72 @@
+import std.env:{args};
+import std.io.fs:{writeFile};
+
+fn main() {
+  if args().len() > 3 {
+    print("Usage: generate_ast <output directory>");
+    exit(64);
+  }
+
+  let outputDir = args()[2];
+
+  defineAst(outputDir, "Expr", [
+    "Binary   | left: Expr, operator: Token, right: Expr",
+    "Grouping | expression: Expr",
+    "Literal  | value",
+    "Unary    | operator: Token, right: Token"
+  ]);
+}
+
+fn defineAst(outputDir: string, baseName: string, types: string) {
+  let path = "${outputDir}/${baseName.downCase()}.lay";
+
+  let source = "export class ${baseName} {\n";
+  source += "  accept<R>(visitor: Visitor<R>) -> R {}\n";
+  source += "}\n\n";
+
+  source += defineVisitor(baseName, types);
+
+  for type_ in types {
+    let className = type_.split("|").list()[0].trim();
+    let fields = type_.split("|").list()[1].trim();
+    source += defineType(baseName, className, fields);
+  }
+
+  print(path);
+  print(source);
+  writeFile(path, source);
+}
+
+fn defineType(baseName: string, className: string, fieldList: string) -> string {
+  let source = "export class ${className} : ${baseName} {\n";
+  source += "  init(${fieldList}) {\n";
+
+  let fields = fieldList.split(", ");
+  for field in fields {
+    let field_name = field.split(":").list()[0].trim();
+    source += "    @${field_name} = ${field_name};\n";
+  }
+
+  source += "  }\n\n";
+  source += "  accept<R>(visitor: Visitor<R>) {\n";
+  source += "    visitor.visit(self)\n";
+  source += "  }\n";
+  source += "}\n";
+  source += "\n";
+  source
+}
+
+fn defineVisitor(baseName: string, types: List<string>) -> string {
+  let source = "trait Vistor<R> {\n";
+
+  for type_ in types {
+    let typeName = type_.split("|").list()[0].trim();
+
+    source += "  visit${typeName}${baseName}(${baseName.downCase()}: ${typeName}) -> R;\n";
+  }
+
+  source += "}\n\n";
+  source
+}
+
+main();

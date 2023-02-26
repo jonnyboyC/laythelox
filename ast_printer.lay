@@ -1,0 +1,34 @@
+import self.expr:{Binary, Grouping, Literal, Unary, Expr};
+
+class AstPrinter {
+  print(expr: Expr) -> string {
+    expr.accept(self)
+  }
+
+  visitBinaryExpr(expr: Unary) -> string {
+    @parenthesize(expr.operator.lexeme, expr.left, expr.right)
+  }
+
+  visitGroupingExpr(expr: Grouping) -> string {
+    @parenthesize("group", expr.expression)
+  }
+
+  visitLiteralExpr(expr: Literal) -> string {
+    expr.value.str()
+  }
+
+  visitUnaryExpr(expr: Unary) -> string {
+    @parenthesize(expr.operator.lexeme, expr.right)
+  }
+
+  parenthesize(name: string, exprs: List<Expr>) -> string {
+    let builder = "(${name}";
+
+    for expr in exprs {
+      builder += " ${expr.accept(self)}";
+    }
+
+    builder += ")";
+    builder
+  }
+}

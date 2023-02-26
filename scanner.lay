@@ -55,7 +55,6 @@ export class Scanner {
   }
 
   scanToken() {
-
     let c = @advance();
 
     if c == '(' {
