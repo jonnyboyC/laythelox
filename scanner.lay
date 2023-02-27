@@ -1,6 +1,6 @@
-import self.token_type;
+import self.token_kind as tk;
 import self.token:{Token};
-import self.utils;
+import self.utils:{errorRaw};
 
 fn isDigit(c) {
   c >= '0' and c <= '9'
@@ -17,22 +17,22 @@ fn isAlphaNumeric(c) {
 }
 
 let keywords = {
-  "and": token_type.AND,
-  "class": token_type.CLASS,
-  "else": token_type.ELSE,
-  "false": token_type.FALSE,
-  "for": token_type.FOR,
-  "fun": token_type.FUN,
-  "if": token_type.IF,
-  "nil": token_type.NIL,
-  "or": token_type.OR,
-  "print": token_type.PRINT,
-  "return": token_type.RETURN,
-  "super": token_type.SUPER,
-  "this": token_type.THIS,
-  "true": token_type.TRUE,
-  "var": token_type.VAR,
-  "while": token_type.WHILE,
+  "and": tk.AND,
+  "class": tk.CLASS,
+  "else": tk.ELSE,
+  "false": tk.FALSE,
+  "for": tk.FOR,
+  "fun": tk.FUN,
+  "if": tk.IF,
+  "nil": tk.NIL,
+  "or": tk.OR,
+  "print": tk.PRINT,
+  "return": tk.RETURN,
+  "super": tk.SUPER,
+  "this": tk.THIS,
+  "true": tk.TRUE,
+  "var": tk.VAR,
+  "while": tk.WHILE,
 };
 
 export class Scanner {
@@ -50,7 +50,7 @@ export class Scanner {
       @scanToken();
     }
 
-    @tokens.push(Token(token_type.EOF, '', nil, @line));
+    @tokens.push(Token(tk.EOF, '', nil, @line));
     @tokens
   }
 
@@ -58,40 +58,40 @@ export class Scanner {
     let c = @advance();
 
     if c == '(' {
-      @addToken(token_type.LEFT_PAREN);
+      @addToken(tk.LEFT_PAREN);
     } else if c == ')' {
-      @addToken(token_type.RIGHT_PAREN);
+      @addToken(tk.RIGHT_PAREN);
     } else if c == '{' {
-      @addToken(token_type.LEFT_BRACE);
+      @addToken(tk.LEFT_BRACE);
     } else if c == '}' {
-      @addToken(token_type.RIGHT_BRACE);
+      @addToken(tk.RIGHT_BRACE);
     } else if c == ',' {
-      @addToken(token_type.COMMA);
+      @addToken(tk.COMMA);
     } else if c == '.' {
-      @addToken(token_type.DOT);
+      @addToken(tk.DOT);
     } else if c == '-' {
-      @addToken(token_type.MINUS);
+      @addToken(tk.MINUS);
     } else if c == '+' {
-      @addToken(token_type.PLUS);
+      @addToken(tk.PLUS);
     } else if c == ';' {
-      @addToken(token_type.SEMICOLON);
+      @addToken(tk.SEMICOLON);
     } else if c == '*' {
-      @addToken(token_type.STAR);
+      @addToken(tk.STAR);
     } else if c == '!' {
-      @addToken(@match('=') ? token_type.BANG_EQUAL : token_type.BANG);
+      @addToken(@match('=') ? tk.BANG_EQUAL : tk.BANG);
     } else if c == '=' {
-      @addToken(@match('=') ? token_type.EQUAL_EQUAL : token_type.EQUAL);
+      @addToken(@match('=') ? tk.EQUAL_EQUAL : tk.EQUAL);
     } else if c == '<' {
-      @addToken(@match('=') ? token_type.LESS_EQUAL : token_type.LESS);
+      @addToken(@match('=') ? tk.LESS_EQUAL : tk.LESS);
     } else if c == '>' {
-      @addToken(@match('=') ? token_type.GREATER_EQUAL : token_type.GREATER);
+      @addToken(@match('=') ? tk.GREATER_EQUAL : tk.GREATER);
     } else if c == '/' {
       if @match('/') {
         while @peek() != '\n' and !@isAtEnd() {
           @advance();
         }
       } else {
-        @addToken(token_type.SLASH);
+        @addToken(tk.SLASH);
       }
     } else if c == ' ' {
     } else if c == '\r' {
@@ -107,7 +107,7 @@ export class Scanner {
       } else if isAlpha(c) {
         @identifer();
       } else {
-        utils.error(@line, 'Unexpected character.');
+        errorRaw(@line, 'Unexpected character.');
       }
     }
   }
@@ -121,7 +121,7 @@ export class Scanner {
     let kind = keywords.get(text);
 
     if kind == nil {
-      kind = token_type.IDENTIFIER;
+      kind = tk.IDENTIFIER;
     }
 
     @addToken(kind)
@@ -134,7 +134,7 @@ export class Scanner {
     }
 
     if @isAtEnd() {
-      utils.error(@line, 'Unterminated string.');
+      errorRaw(@line, 'Unterminated string.');
       return;
     }
 
@@ -142,7 +142,7 @@ export class Scanner {
 
     // Trim the surrounding quotes.
     let value = @source.slice(@start + 1, @current - 1);
-    @addTokenLiteral(token_type.STRING, value);
+    @addTokenLiteral(tk.STRING, value);
   }
 
   number() {
@@ -158,7 +158,7 @@ export class Scanner {
       }
     }
 
-    @addTokenLiteral(token_type.NUMBER, Number.parse(@source.slice(@start, @current)));
+    @addTokenLiteral(tk.NUMBER, Number.parse(@source.slice(@start, @current)));
   }
 
   advance() -> string {

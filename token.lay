@@ -7,6 +7,6 @@ export class Token {
   }
 
   str() -> string {
-    "${@kind} ${@lexeme} ${@literal}"
+    "Token {${@kind} ${@lexeme} ${@literal}}"
   }
 }

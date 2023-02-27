@@ -1,0 +1,174 @@
+import self.token_kind as tk;
+import self.token:{Token};
+import self.expr:{Expr, Binary, Unary, Literal, Grouping};
+import self.utils:{error};
+
+export class Parser {
+  init(tokens: List<Token>) {
+    @tokens = tokens;
+    @current = 0;
+  }
+
+  parse() -> Expr {
+    try {
+      return @expression();
+    } catch {
+      return nil;
+    }
+  }
+
+  expression() -> Expr {
+    @equality()
+  }
+
+  equality() -> Expr {
+    let expr = @comparision();
+
+    while @match([tk.BANG_EQUAL, tk.EQUAL_EQUAL]) {
+      let operator = @previous();
+      let right = @comparision();
+      expr = Binary(expr, operator, right);
+    }
+
+    expr
+  }
+
+  comparision() -> Expr {
+    let expr = @term();
+
+    while @match([tk.GREATER, tk.GREATER_EQUAL, tk.LESS, tk.LESS_EQUAL]) {
+      let operator = @previous();
+      let right = @term();
+      expr = Binary(expr, operator, right);
+    }
+
+    expr
+  }
+
+  term() -> Expr {
+    let expr = @factor();
+
+    while @match([tk.MINUS, tk.PLUS]) {
+      let operator = @previous();
+      let right = @factor();
+      expr = Binary(expr, operator, right);
+    }
+
+    expr
+  }
+
+  factor() -> Expr {
+    let expr = @unary();
+
+    while @match([tk.SLASH, tk.STAR]) {
+      let operator = @previous();
+      let right = @unary();
+      expr = Binary(expr, operator, right);
+    }
+
+    expr
+  }
+
+  unary() -> Expr {
+    if @match([tk.BANG, tk.MINUS]) {
+      let operator = @previous();
+      let right = @unary();
+      return Unary(operator, right);
+    }
+
+    @primary()
+  }
+
+  primary() -> Expr {
+    if @match([tk.FALSE]) { return Literal(false); }
+    if @match([tk.TRUE]) { return Literal(true); }
+    if @match([tk.NIL]) { return Literal(nil); }
+
+    if @match([tk.NUMBER, tk.STRING]) {
+      return Literal(@previous().literal);
+    }
+
+    if @match([tk.LEFT_PAREN]) {
+      let expr = @expression();
+      @consume(tk.RIGHT_PAREN, "Expected ')' after expression.");
+      return Grouping(expr);
+    }
+
+
+    @throw(@error(@peek(), "Expected expression."));
+  }
+
+  match(kinds: string[]) -> bool {
+    for kind in kinds {
+      if @check(kind) {
+        @advance();
+        return true;
+      }
+    }
+
+    false
+  }
+
+  consume(kind: string, message: string) -> Token {
+    if @check(kind) {
+      return @advance();
+    }
+
+    @throw(@error(@peek(), message));
+  }
+
+  check(kind: string) -> bool {
+    if @isAtEnd() { return false; }
+    @peek().kind == kind
+  }
+
+  advance() -> Token {
+    if !@isAtEnd() {
+      @current += 1;
+    }
+
+    @previous()
+  }
+
+  isAtEnd() -> bool {
+    @peek().kind == tk.EOF
+  }
+
+  peek() -> Token {
+    @tokens[@current]
+  }
+
+  previous() -> Token {
+    @tokens[@current - 1]
+  }
+
+  error(token: Token, message: string) -> ParseError {
+    error(token, message);
+    ParseError()
+  }
+
+  synchronize() {
+    @advance();
+
+    let known = [tk.CLASS, tk.FUN, tk.VAR, tk.FOR, tk.IF, tk.WHILE, tk.PRINT, tk.RETURN];
+
+    while !@isAtEnd() {
+      if @previous().kind == tk.SEMICOLON {
+        return;
+      }
+
+      if known.has(@peek.kind) {
+        return;
+      }
+
+      @advance();
+    }
+  }
+
+  throw(error) {
+    0/1;
+  }
+}
+
+
+class ParseError {}

@@ -1,14 +1,15 @@
 import std.env:{args};
-import std.io.fs:{File};
+import std.io.fs:{readFile};
 import std.io.stdio:{stdin, stdout};
 import self.scanner:{Scanner};
-
-let hadError = false;
+import self.parser:{Parser};
+import self.ast_printer:{AstPrinter};
+import self.utils:{hadError, setHadError};
 
 fn runFile(path: string) {
-  run(File.readAllText(path));
+  run(readFile(path));
 
-  if hadError {
+  if hadError() {
     exit(65);
   }
 }
@@ -23,7 +24,7 @@ fn runPrompt() {
     }
 
     run(line);
-    hadError = false;
+    setHadError(false);
   }
 }
 
@@ -31,9 +32,12 @@ fn run(source: string) {
   let scanner = Scanner(source);
   let tokens = scanner.scanTokens();
 
-  for token in tokens {
-    stdout.writeln(token.str());
-  }
+  let parser = Parser(tokens);
+  let expression = parser.parse();
+
+  if hadError() { return; }
+
+  stdout.writeln(AstPrinter().print(expression));
 }
 
 

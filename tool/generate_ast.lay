@@ -49,7 +49,7 @@ fn defineType(baseName: string, className: string, fieldList: string) -> string 
 
   source += "  }\n\n";
   source += "  accept<R>(visitor: Visitor<R>) {\n";
-  source += "    visitor.visit(self)\n";
+  source += "    visitor.visit${className}${baseName}(self)\n";
   source += "  }\n";
   source += "}\n";
   source += "\n";

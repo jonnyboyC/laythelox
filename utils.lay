@@ -1,9 +1,24 @@
 import std.io.stdio:{stderr};
+import self.token_kind as tk;
 
-export fn error(line: number, message: string) {
+let hadErrorState = false;
+
+export fn hadError() { hadErrorState }
+export fn setHadError(state) { hadErrorState = state; }
+
+export fn error(token: Token, message: string) {
+  if token.kind == tk.EOF {
+    report(token.line, " at end", message);
+  } else {
+    report(token.line, " at '${token.lexeme}'", message);
+  }
+}
+
+export fn errorRaw(line: number, message: string) {
   report(line, "", message);
 }
 
-fn report(line: number, where: string, message: string) {
+export fn report(line: number, where: string, message: string) {
   stderr.writeln("[line ${line}] Error${where}: ${message}");
+  setHadError(true);
 }

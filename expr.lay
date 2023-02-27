@@ -17,7 +17,7 @@ export class Binary : Expr {
   }
 
   accept<R>(visitor: Visitor<R>) {
-    visitor.visit(self)
+    visitor.visitBinaryExpr(self)
   }
 }
 
@@ -27,7 +27,7 @@ export class Grouping : Expr {
   }
 
   accept<R>(visitor: Visitor<R>) {
-    visitor.visit(self)
+    visitor.visitGroupingExpr(self)
   }
 }
 
@@ -37,7 +37,7 @@ export class Literal : Expr {
   }
 
   accept<R>(visitor: Visitor<R>) {
-    visitor.visit(self)
+    visitor.visitLiteralExpr(self)
   }
 }
 
@@ -48,7 +48,7 @@ export class Unary : Expr {
   }
 
   accept<R>(visitor: Visitor<R>) {
-    visitor.visit(self)
+    visitor.visitUnaryExpr(self)
   }
 }
 
