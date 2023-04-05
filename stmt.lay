@@ -1,0 +1,54 @@
+import self.token:{Token};
+
+export class Stmt {
+  accept<R>(visitor: Visitor<R>) -> R {}
+}
+
+trait Vistor<R> {
+  visitBlockStmt(stmt: Block) -> R;
+  visitExpressionStmt(stmt: Expression) -> R;
+  visitPrintStmt(stmt: Print) -> R;
+  visitVarStmt(stmt: Var) -> R;
+}
+
+export class Block : Stmt {
+  init(statements: Stmt[]) {
+    @statements = statements;
+  }
+
+  accept<R>(visitor: Visitor<R>) {
+    visitor.visitBlockStmt(self)
+  }
+}
+
+export class Expression : Stmt {
+  init(expression: Expr) {
+    @expression = expression;
+  }
+
+  accept<R>(visitor: Visitor<R>) {
+    visitor.visitExpressionStmt(self)
+  }
+}
+
+export class Print : Stmt {
+  init(expression: Expr) {
+    @expression = expression;
+  }
+
+  accept<R>(visitor: Visitor<R>) {
+    visitor.visitPrintStmt(self)
+  }
+}
+
+export class Var : Stmt {
+  init(name: Token, initializer: Expr) {
+    @name = name;
+    @initializer = initializer;
+  }
+
+  accept<R>(visitor: Visitor<R>) {
+    visitor.visitVarStmt(self)
+  }
+}
+

@@ -1,9 +1,70 @@
-import self.expr:{Binary, Grouping, Literal, Unary, Expr};
+import self.expr:{Binary, Grouping, Literal, Unary, Expr, Variable, Assign};
+import self.stmt:{Expression, Print, Stmt, Var, Block};
+import self.environment:{Environment};
+import self.utils:{runtimeError};
 import self.token_kind as tk;
 
 export class Interpreter {
+  init() {
+    @environment = Environment(nil);
+  }
+
+  interpret(statements: Stmt[]) {
+    try {
+      for statement in statements {
+        @execute(statement);
+      }
+    } catch {
+      runtimeError();
+    }
+  }
+
+  execute(stmt: Stmt) {
+    stmt.accept(self);
+  }
+
+  executeBlock(statements: Stmt[], environment: Environment) {
+    let previous = @environment;
+
+    try {
+      @environment = environment;
+
+      for statement in statements {
+        @execute(statement);
+      }
+    } catch {
+      @environment = previous;
+    }
+  }
+
   evaluate(expr: Expr) -> any {
     expr.accept(self)
+  }
+
+  visitBlockStmt(stmt: Block) {
+    @executeBlock(stmt.statements, Environment(@environment));
+  }
+
+  visitVarStmt(stmt: Var) {
+    let value = stmt.initializer
+      && @evaluate(stmt.initializer);
+
+    @environment.define(stmt.name.lexeme, value);
+  }
+
+  visitAssignExpr(expr: Assign) {
+    let value = @evaluate(expr.value);
+    @environment.assign(expr.name, value);
+    value
+  }
+
+  visitExpressionStmt(stmt: Expression) {
+    @evaluate(stmt.expression);
+  }
+
+  visitPrintStmt(stmt: Print) {
+    let value = @evaluate(stmt.expression);
+    print(value);
   }
 
   visitBinaryExpr(expr: Unary) -> string {
@@ -18,23 +79,32 @@ export class Interpreter {
       if (left.cls() == String && right.cls() == String) {
         return left + right;
       }
+
+      raise Error("Operands must be two numbers or two strings.");
     } else if expr.operator.kind == tk.BANG_EQUAL {
       return left != right;
     } else if expr.operator.kind == tk.EQUAL_EQUAL {
       return left == right;
     } else if expr.operator.kind == tk.GREATER {
+      checkNumberOperands(expr.operator, left, right);
       return left > right;
     } else if expr.operator.kind == tk.GREATER_EQUAL {
+      checkNumberOperands(expr.operator, left, right);
       return left >= right;
     } else if expr.operator.kind == tk.LESS {
+      checkNumberOperands(expr.operator, left, right);
       return left < right;
     } else if expr.operator.kind == tk.LESS_EQUAL {
+      checkNumberOperands(expr.operator, left, right);
       return left <= right;
     } else if expr.operator.kind == tk.MINUS {
+      checkNumberOperands(expr.operator, left, right);
       return left - right;
     } else if expr.operator.kind == tk.SLASH {
+      checkNumberOperands(expr.operator, left, right);
       return left / right;
     } else if expr.operator.kind == tk.STAR {
+      checkNumberOperands(expr.operator, left, right);
       return left * right;
     }
 
@@ -53,21 +123,33 @@ export class Interpreter {
     let right = @evaluate(expr.right);
 
     if expr.operator.kind == tk.MINUS {
+      checkNumberOperand(expr.operator, right);
       return -right;
-    } else if expr.operator.kind tk.BANG {
+    } else if expr.operator.kind == tk.BANG {
       return !isTruthy(right);
     }
 
     nil
   }
+
+  visitVariableExpr(expr: Variable) -> any {
+    @environment.get(expr.name)
+  }
+}
+
+fn checkNumberOperands(operator: Token, left: any, right: any) {
+  if (left.cls() == Number && right.cls() == Number) { return; }
+
+  raise Error("Operands must be numbers.");
+}
+
+fn checkNumberOperand(operator: Token, operand: any) {
+  if (operand.cls() == Number) { return; }
+  raise Error("Operand must be a number.");
 }
 
 fn isTruthy(object: any) -> bool {
   if object == nil { return false; }
   if object == false { return false; }
   true
-}
-
-fn isEqual(object: any) -> bool {
-  a == b
 }

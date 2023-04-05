@@ -2,10 +2,17 @@ import std.io.stdio:{stderr};
 import self.token_kind as tk;
 
 let hadErrorState = false;
+let hadRunTimeErrorState = false;
 
 export fn hadError() { hadErrorState }
-export fn setHadError(state) {
-  hadErrorState = state;
+export fn setError(state) { hadErrorState = state; }
+
+export fn hadRuntimeError() { hadRunTimeErrorState }
+export fn setRuntimeError(state) { hadRunTimeErrorState = state; }
+
+export fn runtimeError() {
+  print("We can't do this yet");
+  hadRunTimeErrorState = true;
 }
 
 export fn error(token: Token, message: string) {
@@ -22,5 +29,5 @@ export fn errorRaw(line: number, message: string) {
 
 export fn report(line: number, where: string, message: string) {
   stderr.writeln("[line ${line}] Error${where}: ${message}");
-  setHadError(true);
+  setError(true);
 }

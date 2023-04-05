@@ -1,12 +1,27 @@
+import self.token:{Token};
+
 export class Expr {
   accept<R>(visitor: Visitor<R>) -> R {}
 }
 
 trait Vistor<R> {
+  visitAssignExpr(expr: Assign) -> R;
   visitBinaryExpr(expr: Binary) -> R;
   visitGroupingExpr(expr: Grouping) -> R;
   visitLiteralExpr(expr: Literal) -> R;
   visitUnaryExpr(expr: Unary) -> R;
+  visitVariableExpr(expr: Variable) -> R;
+}
+
+export class Assign : Expr {
+  init(name: Token, value: Expr) {
+    @name = name;
+    @value = value;
+  }
+
+  accept<R>(visitor: Visitor<R>) {
+    visitor.visitAssignExpr(self)
+  }
 }
 
 export class Binary : Expr {
@@ -49,6 +64,16 @@ export class Unary : Expr {
 
   accept<R>(visitor: Visitor<R>) {
     visitor.visitUnaryExpr(self)
+  }
+}
+
+export class Variable : Expr {
+  init(name: Token) {
+    @name = name;
+  }
+
+  accept<R>(visitor: Visitor<R>) {
+    visitor.visitVariableExpr(self)
   }
 }
 

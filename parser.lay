@@ -1,6 +1,7 @@
 import self.token_kind as tk;
 import self.token:{Token};
-import self.expr:{Expr, Binary, Unary, Literal, Grouping};
+import self.expr:{Expr, Binary, Unary, Literal, Grouping, Variable, Assign};
+import self.stmt:{Print, Expression, Var};
 import self.utils:{error};
 
 export class Parser {
@@ -10,15 +11,83 @@ export class Parser {
   }
 
   parse() -> Expr {
+    let statements = [];
+
+    while (!@isAtEnd()) {
+      statements.push(@declaration());
+    }
+
+    statements
+  }
+
+  declaration() -> Stmt {
     try {
-      return @expression();
+      if (@match([tk.VAR])) { return @varDeclaration(); }
+
+      return @statement();
     } catch {
+      @synchronize();
       return nil;
     }
   }
 
+  statement() -> Stmt {
+    if (@match([tk.PRINT])) { return @printStatement(); }
+    @expressionStatement()
+  }
+
+  printStatement() -> Stmt {
+    let value = @expression();
+    @consume(tk.SEMICOLON, "Expect ';' after value.");
+    Print(value)
+  }
+
+  varDeclaration() -> Stmt {
+    let name = @consume(tk.IDENTIFIER, "Expect variable name.");
+
+    let initializer = @match([tk.EQUAL]) ? @expression() : nil;
+
+    @consume(tk.SEMICOLON, "Expect ';' after variable declaration.");
+    Var(name, initializer)
+  }
+
+  expressionStatement() -> Stmt {
+    let expr = @expression();
+    @consume(tk.SEMICOLON, "Expect ';' after expression.");
+    Expression(expr)
+  }
+
+  block() -> Stmt {
+    let statements = [];
+
+    while !@check(tk.RIGHT_BRACE) && !@isAtEnd() {
+      statements.push(@declaration());
+    }
+
+    @consume(@tk.RIGHT_BRACE, "Expect '}' after block.");
+    statements
+  }
+
   expression() -> Expr {
-    @equality()
+    @assignment()
+  }
+
+  assignment() -> Expr {
+    let expr = @equality();
+
+    if @match([tk.EQUAL]) {
+      let equals = @previous();
+      let value = @assignment();
+
+      if expr.cls() == Variable {
+        let name = expr.name;
+        return Assign(name, value);
+      }
+
+      error(equals, "Invalid assignment target.");
+    }
+
+    expr
   }
 
   equality() -> Expr {
@@ -86,6 +155,10 @@ export class Parser {
 
     if @match([tk.NUMBER, tk.STRING]) {
       return Literal(@previous().literal);
+    }
+
+    if @match([tk.IDENTIFIER]) {
+      return Variable(@previous());
     }
 
     if @match([tk.LEFT_PAREN]) {

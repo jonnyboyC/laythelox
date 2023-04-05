@@ -1,0 +1,37 @@
+import self.token:{Token};
+
+export class Environment {
+  init(enclosing) {
+    @values = {};
+    @enclosing = enclosing;
+  }
+
+  get(name: Token) -> any {
+    if @values.has(name.lexeme) {
+      return @values[name.lexeme];
+    }
+
+    if @enclosing {
+      return @enclosing.get(name);
+    }
+
+    raise Error("Undefined variable '${name.lexeme}'.");
+  }
+
+  assign(name: Token, value: any) {
+    if @values.has(name.lexeme) {
+      @values[name] = value;
+    }
+
+    if @enclosing {
+      @enclosing.assign(name, value);
+      return;
+    }
+
+    raise Error("Undefined variable '${name.lexeme}'.");
+  }
+
+  define(name: string, value: any) {
+    @values[name] = value;
+  }
+}

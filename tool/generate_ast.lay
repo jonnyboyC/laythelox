@@ -10,17 +10,29 @@ fn main() {
   let outputDir = args()[2];
 
   defineAst(outputDir, "Expr", [
+    "Assign   | name: Token, value: Expr",
     "Binary   | left: Expr, operator: Token, right: Expr",
     "Grouping | expression: Expr",
     "Literal  | value",
-    "Unary    | operator: Token, right: Token"
+    "Unary    | operator: Token, right: Token",
+    "Variable | name: Token"
+  ]);
+
+  defineAst(outputDir, "Stmt", [
+    "Block      | statements: Stmt[]",
+    "Expression | expression: Expr",
+    "Print      | expression: Expr",
+    "Var        | name: Token, initializer: Expr"
   ]);
 }
 
 fn defineAst(outputDir: string, baseName: string, types: string) {
   let path = "${outputDir}/${baseName.downCase()}.lay";
 
-  let source = "export class ${baseName} {\n";
+  let source = "";
+  source += "import self.token:{Token};\n";
+  source += "\n";
+  source += "export class ${baseName} {\n";
   source += "  accept<R>(visitor: Visitor<R>) -> R {}\n";
   source += "}\n\n";
 
