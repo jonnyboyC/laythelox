@@ -1,0 +1,73 @@
+import self.expr:{Binary, Grouping, Literal, Unary, Expr};
+import self.token_kind as tk;
+
+export class Interpreter {
+  evaluate(expr: Expr) -> any {
+    expr.accept(self)
+  }
+
+  visitBinaryExpr(expr: Unary) -> string {
+    let left = @evaluate(expr.left);
+    let right = @evaluate(expr.right);
+
+    if expr.operator.kind == tk.PLUS {
+      if (left.cls() == Number && right.cls() == Number) {
+        return left + right;
+      }
+
+      if (left.cls() == String && right.cls() == String) {
+        return left + right;
+      }
+    } else if expr.operator.kind == tk.BANG_EQUAL {
+      return left != right;
+    } else if expr.operator.kind == tk.EQUAL_EQUAL {
+      return left == right;
+    } else if expr.operator.kind == tk.GREATER {
+      return left > right;
+    } else if expr.operator.kind == tk.GREATER_EQUAL {
+      return left >= right;
+    } else if expr.operator.kind == tk.LESS {
+      return left < right;
+    } else if expr.operator.kind == tk.LESS_EQUAL {
+      return left <= right;
+    } else if expr.operator.kind == tk.MINUS {
+      return left - right;
+    } else if expr.operator.kind == tk.SLASH {
+      return left / right;
+    } else if expr.operator.kind == tk.STAR {
+      return left * right;
+    }
+
+    nil;
+  }
+
+  visitGroupingExpr(expr: Grouping) -> string {
+    @evaluate(expr.expression);
+  }
+
+  visitLiteralExpr(expr: Literal) -> any {
+    expr.value
+  }
+
+  visitUnaryExpr(expr: Unary) -> string {
+    let right = @evaluate(expr.right);
+
+    if expr.operator.kind == tk.MINUS {
+      return -right;
+    } else if expr.operator.kind tk.BANG {
+      return !isTruthy(right);
+    }
+
+    nil
+  }
+}
+
+fn isTruthy(object: any) -> bool {
+  if object == nil { return false; }
+  if object == false { return false; }
+  true
+}
+
+fn isEqual(object: any) -> bool {
+  a == b
+}

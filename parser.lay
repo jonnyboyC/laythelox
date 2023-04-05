@@ -114,7 +114,7 @@ export class Parser {
       return @advance();
     }
 
-    @throw(@error(@peek(), message));
+    raise @error(@peek(), message);
   }
 
   check(kind: string) -> bool {
@@ -142,9 +142,9 @@ export class Parser {
     @tokens[@current - 1]
   }
 
-  error(token: Token, message: string) -> ParseError {
+  error(token: Token, message: string) -> Error {
     error(token, message);
-    ParseError()
+    Error()
   }
 
   synchronize() {
@@ -166,9 +166,6 @@ export class Parser {
   }
 
   throw(error) {
-    0/1;
+    1/0;
   }
 }
-
-
-class ParseError {}

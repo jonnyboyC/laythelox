@@ -4,7 +4,9 @@ import self.token_kind as tk;
 let hadErrorState = false;
 
 export fn hadError() { hadErrorState }
-export fn setHadError(state) { hadErrorState = state; }
+export fn setHadError(state) {
+  hadErrorState = state;
+}
 
 export fn error(token: Token, message: string) {
   if token.kind == tk.EOF {

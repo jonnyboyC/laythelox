@@ -35,7 +35,11 @@ fn run(source: string) {
   let parser = Parser(tokens);
   let expression = parser.parse();
 
-  if hadError() { return; }
+  print(hadError());
+
+  if hadError() {
+    return;
+  }
 
   stdout.writeln(AstPrinter().print(expression));
 }
